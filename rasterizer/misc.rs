@@ -2,22 +2,6 @@ use pixels::Pixels;
 
 
 
-pub struct Triangle {
-    pub data: [Item; 3],
-    pub color: [u8; 3]
-}
-
-impl Triangle {
-
-    pub fn new(x: Item, y: Item, z: Item, color: [u8; 3]) -> Triangle
-    {    
-        return Triangle {
-            data: [x, y ,z],
-            color: color        
-        };
-    }
-}
-
 pub struct PixelsCoordinate {
     pub coord: Vec<Item>,
     pub height: u32,
@@ -38,7 +22,6 @@ impl PixelsCoordinate {
 
 
 #[derive(Copy, Clone)]
-
 pub struct Item {
     pub x: i32,
     pub y: i32,
@@ -58,7 +41,7 @@ impl Item {
 }
 
 pub struct ObjectDraw {
-    pub obj: Vec<Triangle>,
+    pub obj: Vec<Item>,
 }
 
 impl ObjectDraw {
@@ -72,7 +55,7 @@ impl ObjectDraw {
 }
 
 
-pub fn ix(x: i32, y: i32, w: u32) -> usize
+fn ix(x: i32, y: i32, w: u32) -> usize
 {
     return ( x + y * w as i32) as usize;
 }

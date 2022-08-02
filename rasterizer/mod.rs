@@ -3,6 +3,7 @@ pub mod bresenham_algo;
 pub mod scanline_algo;
 pub mod bubble_sort_algo;
 
+use crate::misc::{WIDTH, HEIGHT};
 use crate::rasterizer::misc::*;
 use crate::rasterizer::bresenham_algo::bresenham_algo;
 use crate::rasterizer::scanline_algo::scanline_algo;
@@ -17,24 +18,15 @@ pub struct Rasterizer {
 
 impl Rasterizer {
 
-    pub fn init(m: &mut PixelsCoordinate, objet_in: ObjectDraw)
+    pub fn draw(canvas: &mut Pixels, objet_in: &mut ObjectDraw)
     {
+        let mut m = PixelsCoordinate::new(WIDTH, HEIGHT);
 
-        for triangle in objet_in.obj {
+        bresenham_algo(&mut m, objet_in);
 
+        bubble_sort_algo(&mut m);
 
-            bresenham_algo(m, &triangle);
-
-
-        }
-        
-        bubble_sort_algo(m);
-
-    }
-    pub fn draw(m: &mut PixelsCoordinate, canvas: &mut Pixels)
-    {
-
-        scanline_algo(m, canvas);
+        scanline_algo(&mut m, canvas);
 
         if canvas.render().is_err()
         {
