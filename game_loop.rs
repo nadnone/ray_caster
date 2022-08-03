@@ -5,6 +5,8 @@ use crate::rasterizer::misc::*;
 use crate::rasterizer::*;
 
 use crate::misc::*;
+use crate::camera::Camera;
+
 
 fn load_2d_map(canvas: &mut Pixels, factor: [i32; 2]) -> ObjectDraw
 {
@@ -59,17 +61,22 @@ pub fn game_loop(canvas: &mut Pixels)
 
     load_2d_map(canvas, factor);
 
+    let camera = Camera::new(25, 25, 100, 100);
+
     loop {
-        
         let t0 = Instant::now();
 
 
-        thread::sleep(Duration::from_secs_f32(FPS));
 
-        let t = t0.elapsed().as_secs_f32();
+        camera.draw(canvas);
+
+
 
 
         Rasterizer::render(canvas);
+
+        thread::sleep(Duration::from_secs_f32(FPS));
+        let t = t0.elapsed().as_secs_f32();
 
         println!("dt: {t}");
 

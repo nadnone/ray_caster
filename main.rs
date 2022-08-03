@@ -7,6 +7,8 @@ use crate::game_loop::*;
 mod misc;
 use crate::misc::*;
 
+mod camera;
+
 use winit::{ 
     dpi::LogicalSize, 
     window::WindowBuilder,
