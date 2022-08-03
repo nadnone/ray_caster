@@ -49,9 +49,3 @@ impl ObjectDraw {
         };
     }
 }
-
-
-pub fn ix(x: i32, y: i32, w: u32) -> usize
-{
-    return ( x + y * w as i32) as usize;
-}

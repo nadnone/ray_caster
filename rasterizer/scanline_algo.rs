@@ -24,7 +24,7 @@ fn binary_search(y0: i32, m: &mut Vec<Item>) -> i32
     return l;
 }
 
-pub fn scanline_algo(m: &mut PixelsCoordinate, canvas: &mut Pixels)
+pub fn scanline_algo(m: &mut PixelsCoordinate)
 {
     let mut m_tmp = m.coord.clone();
 
@@ -54,11 +54,11 @@ pub fn scanline_algo(m: &mut PixelsCoordinate, canvas: &mut Pixels)
 
         if x0 < x1
         {
-            draw_line(x0, x1, y0, m.coord[i].color, m.width, canvas); 
+            draw_line(x0, x1, y0, m.coord[i].color, m.width); 
         }  
         else
         {
-            draw_line(x1, x0, y0, m.coord[i].color, m.width, canvas); 
+            draw_line(x1, x0, y0, m.coord[i].color, m.width); 
         } 
 
 

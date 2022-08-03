@@ -1,4 +1,3 @@
-use pixels::Pixels;
 
 use crate::rasterizer::*;
 use crate::rasterizer::misc::{ObjectDraw, Item};
@@ -31,6 +30,7 @@ impl Camera {
     
     pub fn new(w:i32, h:i32, x:i32, y:i32) -> Camera
     {
+        
         return Camera {
             width: w,
             height: h,
@@ -38,17 +38,14 @@ impl Camera {
         };
     }
 
-
-    pub fn translate(self, x: i32 , y: i32) -> Camera
+    pub fn translate(&mut self, x: i32 , y: i32)
     {
-        return Camera {
-            width: self.width,
-            height: self.height,
-            position: Position { x: x, y: y },
-        };
+        self.position.x += x;
+        self.position.y += y;
+
     }
 
-    pub fn draw(self, canvas: &mut Pixels)
+    pub fn draw(self)
     {
         let mut objet = ObjectDraw::new();
 
@@ -66,11 +63,10 @@ impl Camera {
         objet.obj.push(Item { x: x, y: y + self.height, color: color });
         objet.obj.push(Item { x: x + self.width, y: y + self.height, color: color });
 
-
-        
-        Rasterizer::draw(canvas, &mut objet);   
-             
+        Rasterizer::draw(&mut objet);
         objet.obj.clear();
+
+
     }
 
 }

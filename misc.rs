@@ -1,7 +1,8 @@
 pub const WIDTH:u32 = 800;
 pub const HEIGHT:u32 = 800;
-pub const FPS:f32 = 1.0;
-pub const FACTOR_SIZE:f32 = 1.0;
+
+
+pub const FACTOR_RATIO: [i32; 2] = [WIDTH as i32 / 10, HEIGHT as i32 / 10];
 
 
 

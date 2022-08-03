@@ -12,16 +12,12 @@ use crate::rasterizer::scanline_algo::scanline_algo;
 use crate::rasterizer::bubble_sort_algo::bubble_sort_algo;
 use crate::rasterizer::graphics::draw_line;
 
-use pixels::Pixels;
-
-
-pub struct Rasterizer {
-    pub m: PixelsCoordinate,
-}
+use fltk::window::DoubleWindow;
+pub struct Rasterizer;
 
 impl Rasterizer {
 
-    pub fn draw(canvas: &mut Pixels, objet_in: &mut ObjectDraw)
+    pub fn draw(objet_in: &mut ObjectDraw)
     {
 
         let mut m = PixelsCoordinate::new(WIDTH, HEIGHT);
@@ -30,17 +26,8 @@ impl Rasterizer {
 
         bubble_sort_algo(&mut m);
 
-        scanline_algo(&mut m, canvas);
+        scanline_algo(&mut m);
 
-       
-    }
-    pub fn render(canvas: &mut Pixels)
-    {
-        if canvas.render().is_err()
-        {
-            println!("error");
-            return ;
-        }
     }
 
 }
