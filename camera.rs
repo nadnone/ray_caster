@@ -1,4 +1,5 @@
 
+use crate::misc::{HEIGHT, WIDTH};
 use crate::rasterizer::*;
 use crate::rasterizer::misc::{ObjectDraw, Item};
 
@@ -24,6 +25,8 @@ pub struct Camera {
     width: i32,
     height: i32,
     position: Position,
+    m_x: i32,
+    m_y: i32
 }
 
 impl Camera {
@@ -35,6 +38,8 @@ impl Camera {
             width: w,
             height: h,
             position: Position::new(x , y),
+            m_x: 0,
+            m_y: 0
         };
     }
 
@@ -43,6 +48,12 @@ impl Camera {
         self.position.x += x;
         self.position.y += y;
 
+    }
+
+    pub fn rotate(&mut self, m_x: i32, m_y: i32)
+    {
+        self.m_x = m_x;
+        self.m_y = m_y;
     }
 
     pub fn draw(self)
@@ -65,6 +76,18 @@ impl Camera {
 
         Rasterizer::draw(&mut objet);
         objet.obj.clear();
+ 
+        
+        let p_center_x = self.position.x - WIDTH as i32;
+        let p_center_y = self.position.y - HEIGHT as i32;
+
+        
+        // calculer le raycaster
+
+
+        fltk::draw::set_draw_color(fltk::enums::Color::from_rgb(255, 0, 0));
+        fltk::draw::draw_line(self.position.x + self.width/2, self.position.y + self.height/2, self.m_x as i32, self.m_y as i32);
+
 
 
     }

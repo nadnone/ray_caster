@@ -14,7 +14,7 @@ use crate::map::Map;
 use crate::misc::*;
 
 mod keyboard_input;
-use crate::keyboard_input::keyboard_input;
+use crate::keyboard_input::Inputs;
 
 mod camera;
 use crate::camera::Camera;
@@ -40,9 +40,11 @@ pub fn main()
 
             
     println!("Initialization.");
+
     let mut camera = Camera::new(25, 25, 100, 100);
 
-    // 3d map;
+
+    // 2D map;
     let offs = Offscreen::new(wind.width(), wind.height()).unwrap();
 
     offs.begin();
@@ -91,7 +93,7 @@ pub fn main()
 
 
         // Event
-        keyboard_input(&mut camera);
+        Inputs(&mut camera);
 
 
 
@@ -102,7 +104,7 @@ pub fn main()
         //thread::sleep(Duration::from_millis(100));
         t = t0.elapsed().as_secs_f32();
 
-        println!("dt: {t}");
+        //println!("dt: {t}");
     });
 
 

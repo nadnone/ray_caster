@@ -8,7 +8,7 @@ pub fn bresenham_algo(m: &mut PixelsCoordinate, objet: &mut ObjectDraw)
     }
 
     for k in 0..(objet.obj.len() -1)  {
-        
+
         bresenham_calculus_x(objet, k, m, 1, 0);
         bresenham_calculus_y(objet, k, m, 1, 0);
 
@@ -35,7 +35,6 @@ fn bresenham_calculus_x(objet: &mut ObjectDraw, size: usize, m: &mut PixelsCoord
 
     }
 
-  
 
     for x in x0 as i32 .. (x1 as i32 + 1)
     {   
