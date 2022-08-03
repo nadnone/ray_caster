@@ -6,17 +6,16 @@ use crate::rasterizer::*;
 
 use crate::misc::*;
 
-fn load_2d_map(canvas: &mut Pixels) -> ObjectDraw
+fn load_2d_map(canvas: &mut Pixels, factor: [i32; 2]) -> ObjectDraw
 {
     let mut objet = ObjectDraw::new();
 
 
-    let factor: [i32; 2] = [WIDTH as i32 / 10, HEIGHT as i32 / 10];
 
-    for j in 0..5
+    for j in 0..MAP.len()
     {
         
-        for i in 0..5
+        for i in 0..MAP[j].len()
         {
                 let x = i as i32 * factor[0];
                 let y = j as i32 * factor[1];
@@ -31,13 +30,15 @@ fn load_2d_map(canvas: &mut Pixels) -> ObjectDraw
                 objet.obj.push(Item { x: x + factor[0], y: y, color: color });
                 objet.obj.push(Item { x: x + factor[0], y: y + factor[1], color: color });
 
+                Rasterizer::draw(canvas, &mut objet);        
+                objet.obj.clear();
+
                 objet.obj.push(Item { x: x, y: y, color: color });
                 objet.obj.push(Item { x: x, y: y + factor[1], color: color });
                 objet.obj.push(Item { x: x + factor[0], y: y + factor[1], color: color });
 
                 Rasterizer::draw(canvas, &mut objet);        
                 objet.obj.clear();
-                
             }
 
     }
@@ -49,12 +50,14 @@ fn load_2d_map(canvas: &mut Pixels) -> ObjectDraw
 
     return objet;
 }
+
+
 pub fn game_loop(canvas: &mut Pixels)
 {
 
+    let factor: [i32; 2] = [WIDTH as i32 / 10, HEIGHT as i32 / 10];
 
-    load_2d_map(canvas);
-
+    load_2d_map(canvas, factor);
 
     loop {
         
@@ -65,6 +68,8 @@ pub fn game_loop(canvas: &mut Pixels)
 
         let t = t0.elapsed().as_secs_f32();
 
+
+        Rasterizer::render(canvas);
 
         println!("dt: {t}");
 

@@ -9,30 +9,31 @@ pub fn bresenham_algo(m: &mut PixelsCoordinate, objet: &mut ObjectDraw)
 
     for k in 0..(objet.obj.len() -1)  {
         
-        bresenham_calculus(objet, k, m, 1, 0);
+        bresenham_calculus_x(objet, k, m, 1, 0);
+        bresenham_calculus_y(objet, k, m, 1, 0);
 
     }
-    bresenham_calculus(objet, objet.obj.len(), m, 1, 2);
+    bresenham_calculus_x(objet, 0, m, objet.obj.len() - 1, 0);
+    bresenham_calculus_y(objet, 0, m, objet.obj.len() - 1, 0);
 
 
 }
-
-
-fn bresenham_calculus(objet: &mut ObjectDraw, size: usize, m: &mut PixelsCoordinate, upper: usize, lower: usize)
+fn bresenham_calculus_x(objet: &mut ObjectDraw, size: usize, m: &mut PixelsCoordinate, upper: usize, lower: usize)
 {
-
-    let mut l = 0; 
-    let mut u = upper;
+    let l = 0; 
+    let u = upper;
     let k = size - lower;
 
-    if objet.obj[k].x > objet.obj[k+u].x
-    {
-         l = upper;
-         u = 0;
-    }
-    
     let mut x0 = objet.obj[k+l].x as f32;  let mut x1 = objet.obj[k+u].x as f32;
-    let mut y0 = objet.obj[k+l].y as f32;  let mut y1 = objet.obj[k+u].y as f32;
+    let y0 = objet.obj[k+l].y as f32;  let y1 = objet.obj[k+u].y as f32;
+
+    if x0 > x1
+    {
+        let tmp = x0;
+        x0 = x1;
+        x1 = tmp;
+
+    }
 
   
 
@@ -44,16 +45,30 @@ fn bresenham_calculus(objet: &mut ObjectDraw, size: usize, m: &mut PixelsCoordin
 
     }
 
-   
-    if objet.obj[k+l].y > objet.obj[k+u].y
+}
+
+fn bresenham_calculus_y(objet: &mut ObjectDraw, size: usize, m: &mut PixelsCoordinate, upper: usize, lower: usize)
+{
+    let l = 0; 
+    let u = upper;
+    let k = size - lower;
+
+
+    let x0 = objet.obj[k+l].x as f32;  let x1 = objet.obj[k+u].x as f32;
+    let mut y0 = objet.obj[k+l].y as f32;  let mut y1 = objet.obj[k+u].y as f32;
+
+    if y0 > y1
     {
-            l = upper;
-            u = 0;
+        let tmp = y0;
+        y0 = y1;
+        y1 = tmp;
+    }
+    else if y0 == y1
+    {
+        return ;
     }
 
 
-    x0 = objet.obj[k+l].x as f32;  x1 = objet.obj[k+u].x as f32;
-    y0 = objet.obj[k+l].y as f32;  y1 = objet.obj[k+u].y as f32;
 
 
     for y in y0 as i32 .. (y1 as i32 + 1)
@@ -64,6 +79,7 @@ fn bresenham_calculus(objet: &mut ObjectDraw, size: usize, m: &mut PixelsCoordin
 
 
     }
+
 
 
 }

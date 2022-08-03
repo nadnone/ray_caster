@@ -33,7 +33,7 @@ pub fn scanline_algo(m: &mut PixelsCoordinate, canvas: &mut Pixels)
         return ;
     }
 
-    for i in 0..m.coord.len() - 1 {
+    for i in 0..m.coord.len() {
         
         
         let x0 = m.coord[i].x;
