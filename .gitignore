@@ -1,3 +1,7 @@
 /target
 .cargo/config.toml
 Cargo.lock
+SDL2test.lib
+SDL2main.lib
+SDL2.lib
+SDL2.dll
