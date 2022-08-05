@@ -16,15 +16,15 @@ use crate::camera::Camera;
 pub fn gameloop(canvas: &mut Canvas<Window>, event_pump: &mut EventPump, sdl_context: &mut sdl2::Sdl)
 {
 
-    let mut camera = Camera::new(25, 25, 100, 100);
+    let mut camera = Camera::new(25, 25, 400, 300);
 
-    let mut t = 0.0;
+    //let mut t = 0.0;
 
 
     loop 
     {
         
-        let t0 = Instant::now();
+        //let t0 = Instant::now();
         canvas.set_draw_color(Color::RGB(0, 0, 0));
         canvas.clear();
     
@@ -34,16 +34,19 @@ pub fn gameloop(canvas: &mut Canvas<Window>, event_pump: &mut EventPump, sdl_con
 
 
         // minimap
-        Map::load_2d_map(canvas);
+        //Map::load_2d_map(canvas);
     
     
     
     
-    
+        // calculer le raycaster
+        camera.raycaster(canvas);
+
+
         // objects
         camera.draw(canvas);
     
-    
+
     
     
     
@@ -69,11 +72,11 @@ pub fn gameloop(canvas: &mut Canvas<Window>, event_pump: &mut EventPump, sdl_con
         
 
     
-        t = t0.elapsed().as_secs_f32();
+        //t = t0.elapsed().as_secs_f32();
 
 
         
-        println!("dt: {t}");
+        //println!("dt: {t}");
     
         canvas.present();
     

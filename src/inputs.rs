@@ -14,6 +14,8 @@ pub fn inputs(camera: &mut Camera, even_pump: &mut EventPump, sdl_context: &mut 
     // Keyboard Events
 
 
+
+
     let event_keyboard = even_pump.keyboard_state();
 
     if event_keyboard.is_scancode_pressed(Scancode::Escape)
@@ -28,41 +30,34 @@ pub fn inputs(camera: &mut Camera, even_pump: &mut EventPump, sdl_context: &mut 
     }
     
 
+    let x = camera.get_angle().cos() * 1.0;
+    let y = camera.get_angle().sin() * 1.0;
+
 
     if event_keyboard.is_scancode_pressed(Scancode::W)
     {
-        camera.translate(0, -1);
-
+        camera.translate(x, y);
     }
     else if event_keyboard.is_scancode_pressed(Scancode::S)
     {
-        camera.translate(0, 1);
-
+        camera.translate(-x, -y);
     }
+
+
 
     if event_keyboard.is_scancode_pressed(Scancode::A)
     {
-        camera.translate(-1, 0);
+        camera.rotate(-1.0);
 
     }
     else if event_keyboard.is_scancode_pressed(Scancode::D)
     {
-        camera.translate(1, 0);
+        camera.rotate(1.0);
 
     }
 
 
 
-
-    // Mouse Events
-    
-    // Camera LootA
-
-    let mouve_event = even_pump.relative_mouse_state();
-
-
-    let mx = mouve_event.x() as f32;
-    camera.rotate(mx);
 
    
     return 0;
