@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 sdl2 = "0.35.2"
+image = "0.24.3"
 
 [[bin]]
 name = "ray_caster"

@@ -5,7 +5,7 @@ use sdl2::{
     Sdl
 };
 
-use crate::{camera::Camera, misc::SPEED};
+use crate::{camera::Camera, misc::{SPEED, self}};
 
 pub fn inputs(camera: &mut Camera, even_pump: &mut EventPump, sdl_context: &mut Sdl) -> u8
 {
@@ -28,7 +28,8 @@ pub fn inputs(camera: &mut Camera, even_pump: &mut EventPump, sdl_context: &mut 
         sdl_context.mouse().show_cursor(true);
         sdl_context.mouse().set_relative_mouse_mode(false);
     }
-    
+ 
+
 
     let mut angle = camera.get_angle();
 
@@ -65,7 +66,7 @@ pub fn inputs(camera: &mut Camera, even_pump: &mut EventPump, sdl_context: &mut 
 
     if event_keyboard.is_scancode_pressed(Scancode::E)
     {
-        angle -= Camera::degtorad(1.0);
+        angle -= misc::degtorad(2.0);
 
         x = angle.sin() * 0.001;
         y = angle.cos() * 0.001;
@@ -75,7 +76,7 @@ pub fn inputs(camera: &mut Camera, even_pump: &mut EventPump, sdl_context: &mut 
     }
     else if event_keyboard.is_scancode_pressed(Scancode::Q)
     { 
-        angle += Camera::degtorad(1.0);
+        angle += misc::degtorad(2.0);
         
         x = angle.sin() * 0.001;
         y = angle.cos() * 0.001;
@@ -86,8 +87,31 @@ pub fn inputs(camera: &mut Camera, even_pump: &mut EventPump, sdl_context: &mut 
 
 
 
+    // MOUSE event
+    // A REVOIR
+/*
+    let mouse_relative = even_pump.mouse_state();
+
+    let mouse_x = Camera::degtorad(mouse_relative.x() as f32) * Camera::degtorad(FOV as f32) / 10.0;
+    
+    angle += mouse_x;
+
+    x = angle.cos() * 0.001;
+    y = angle.sin() * 0.001;
+
+    camera.translate(x, y, angle);
 
 
+    // recapture the cursor
+    if mouse_relative.is_mouse_button_pressed(sdl2::mouse::MouseButton::Left)
+    {
+        sdl_context.mouse().show_cursor(false);
+        sdl_context.mouse().set_relative_mouse_mode(true);
+    }
+    
+*/
+
+   
     return 0;
 
 }

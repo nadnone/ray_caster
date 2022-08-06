@@ -6,12 +6,18 @@ use sdl2::video::Window;
 use crate::inputs::inputs;
 use crate::camera::Camera;
 use crate::misc::{FPS, CAMERA_ANGLE_START};
-
+use crate::raycaster::*;
 
 
 pub fn gameloop(canvas: &mut Canvas<Window>, event_pump: &mut EventPump, sdl_context: &mut sdl2::Sdl)
 {
 
+
+    // loading textures
+    let wall_texture = image::open("./res/wall_test.jpg").unwrap();
+
+
+    // load camera
     let mut camera = Camera::new(1.0, 1.0, 4.5, 4.5, CAMERA_ANGLE_START);
 
     loop 
@@ -22,10 +28,9 @@ pub fn gameloop(canvas: &mut Canvas<Window>, event_pump: &mut EventPump, sdl_con
     
 
 
-
     
         // calcul du raycaster
-        camera.raycaster(canvas);
+        Raycaster::raycasterize(canvas, &wall_texture, &camera);
 
 
         // minimap
