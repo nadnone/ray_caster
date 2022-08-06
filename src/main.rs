@@ -3,7 +3,6 @@ mod misc;
 mod inputs;
 mod camera;
 mod gameloop;
-mod map;
 
 
 use crate::{gameloop::gameloop, misc::*};
@@ -19,13 +18,12 @@ pub fn main()
     let video_subsystem = sdl_context.video().unwrap();
    
 
-    let wind = video_subsystem.window("RayCaster", WIDTH, HEIGHT)
+    let wind = video_subsystem.window("RayCaster", WIDTH as u32, HEIGHT as u32)
         .position_centered()
         .build()
         .unwrap();
 
     let mut canvas = wind.into_canvas().build().unwrap();
-
 
     let mut event_pump = sdl_context.event_pump().unwrap();
 
