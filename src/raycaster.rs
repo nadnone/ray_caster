@@ -21,8 +21,6 @@ impl Raycaster
     pub fn raycasterize(canvas: &mut Canvas<Window>, wall_texture: &DynamicImage, camera: &Camera) 
     {
         
-
-
         let mut ray_angle = camera.get_angle() - misc::degtorad(HALF_FOV);
 
         for x in 0..(WIDTH as i32)
@@ -35,14 +33,12 @@ impl Raycaster
 
             // wall detection
             let mut wall = 0;
-
             while wall == 0
             {
                 ray_x -= ray_angle.cos() / RAY_PRECISION as f32;
                 ray_y -= ray_angle.sin() / RAY_PRECISION as f32;
                 
                 wall = MAP[ray_x as usize][ray_y as usize];
-
             }
 
 
@@ -57,7 +53,6 @@ impl Raycaster
 
             // texture mapping
 
-
             let delta_x;
 
             if ray_x < 0.5
@@ -70,24 +65,26 @@ impl Raycaster
             {
                 // right side
                 delta_x = ray_x.floor() + 1.0 - ray_x;
-
             }
+
 
             let tx = (delta_x * (wall_texture.width() - 1) as f32) as u32;
 
-            for y in sky_limit..floor_limit {
+
+            for y in 0..(wallheight * 2) {
 
 
-                // A REVOIR
-                
-                let delta_y = y as f32 / floor_limit as f32;
+                let delta_y = y as f32 / (wallheight as f32 * 2.0);
+
                 let ty = (delta_y * (wall_texture.height() - 1) as f32) as u32;
 
                 let tex = wall_texture.get_pixel(tx, ty);
 
                 // Draw the wall
                 canvas.set_draw_color(Color::RGB(tex[0], tex[1], tex[2]));
-                canvas.draw_rect(Rect::new(x as i32, y as i32, 1, 1)).unwrap();
+                    
+                canvas.draw_rect(Rect::new(x as i32, sky_limit + y as i32, 1, 1)).unwrap();
+
 
             }
 
@@ -99,7 +96,6 @@ impl Raycaster
             // floor
             canvas.set_draw_color(Color::RGB(155, 155, 155));
             canvas.draw_line(Point::new(x as i32, floor_limit as i32), Point::new(x as i32, HEIGHT as i32)).unwrap();
-
 
 
 

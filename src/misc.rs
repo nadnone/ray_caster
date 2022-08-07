@@ -12,7 +12,7 @@ pub const HALF_FOV: f32 = FOV / 2.0;
 pub const SPEED: f32 = 0.1;
 pub const MAP_LEN: f32 = 6.0;
 
-pub const RAY_PRECISION: i32 = 64;
+pub const RAY_PRECISION: i32 = 32;
 pub const RAY_INCREAMENT_ANGLE: f32 = FOV / WIDTH as f32;
 
 pub const MAP: [[i32; 7]; 7] = [

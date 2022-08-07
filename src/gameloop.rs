@@ -8,7 +8,7 @@ use sdl2::video::Window;
 use crate::inputs::inputs;
 use crate::camera::{Camera, self};
 use crate::misc::{FPS, CAMERA_ANGLE_START};
-use crate::raycaster::*;
+use crate::{raycaster::*, mini_map};
 
 
 pub fn gameloop(canvas: &mut Canvas<Window>, event_pump: &mut EventPump, sdl_context: &mut sdl2::Sdl)
@@ -20,7 +20,11 @@ pub fn gameloop(canvas: &mut Canvas<Window>, event_pump: &mut EventPump, sdl_con
 
 
     // load camera
-    let mut camera = Camera::new(1.0, 1.0, 5.5, 5.0, CAMERA_ANGLE_START);
+    let mut camera = Camera::new(5.5, 5.0, CAMERA_ANGLE_START);
+    
+    // load minimap
+    let minimap = mini_map::Minimap::minimap_load(canvas);
+
 
     //let mut t = 0.0;
 
@@ -28,7 +32,6 @@ pub fn gameloop(canvas: &mut Canvas<Window>, event_pump: &mut EventPump, sdl_con
     {
         //let t0 = std::time::Instant::now();
         
-        canvas.set_draw_color(Color::RGB(0, 0, 0));
         canvas.clear();
     
 
@@ -37,12 +40,8 @@ pub fn gameloop(canvas: &mut Canvas<Window>, event_pump: &mut EventPump, sdl_con
         Raycaster::raycasterize(canvas, &wall_texture, &camera);
 
 
-
         // minimap
-        camera.minimap_draw(canvas);
-    
-    
-        //println!("{} {}", camera.get_position().0, camera.get_position().1);
+        mini_map::Minimap::minimap_draw(canvas, &minimap, camera);
     
     
     

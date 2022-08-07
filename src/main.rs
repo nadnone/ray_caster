@@ -4,7 +4,8 @@ mod inputs;
 mod camera;
 mod gameloop;
 mod raycaster;
-mod texture_mapper;
+mod mini_map;
+
 
 use crate::{gameloop::gameloop, misc::*};
 
