@@ -18,8 +18,8 @@ impl Camera {
     pub fn new(w:f32, h:f32, x:f32, y:f32, angle: f32) -> Camera
     {
         
-        let x_ = x + w/2.0;
-        let y_ = y + h/2.0;
+        let x_ = x;
+        let y_ = y;
 
         return Camera {
             position: Position::new(x_ , y_),
@@ -76,7 +76,6 @@ impl Camera {
         canvas.set_draw_color(Color::RGB(255, 0, 0));
         let rect = Rect::new(((self.position.x / MAP_LEN) * 60.0) as i32, (self.position.y / MAP_LEN * 60.0) as i32, 5, 5);
         canvas.fill_rect(rect).unwrap();
- 
  
     }
 

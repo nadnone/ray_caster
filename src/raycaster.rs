@@ -1,13 +1,14 @@
 use image::DynamicImage;
+use image::GenericImageView;
 use sdl2::pixels::Color;
 use sdl2::rect::Point;
+use sdl2::rect::Rect;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 
 use crate::camera::Camera;
 use crate::misc;
 use crate::misc::*;
-use crate::texture_mapper;
 
 
 pub struct Raycaster;
@@ -22,11 +23,11 @@ impl Raycaster
         
 
 
-
         let mut ray_angle = camera.get_angle() - misc::degtorad(HALF_FOV);
 
-        for ray_counter in 0..(WIDTH as i32)
+        for x in 0..(WIDTH as i32)
         {
+
             let mut ray_x = camera.get_position().0;
             let mut ray_y = camera.get_position().1;
 
@@ -54,20 +55,50 @@ impl Raycaster
             let sky_limit = HALF_HEIGHT - wallheight;
             let floor_limit = HALF_HEIGHT + wallheight;
 
-
             // texture mapping
-            texture_mapper::texture_mapper(ray_x as usize, ray_y as usize, wall_texture);
+
+
+            let delta_x;
+
+            if ray_x < 0.5
+            {
+                // left side
+                delta_x = ray_x.floor() + ray_x;
+
+            }
+            else 
+            {
+                // right side
+                delta_x = ray_x.floor() + 1.0 - ray_x;
+
+            }
+
+            let tx = (delta_x * (wall_texture.width() - 1) as f32) as u32;
+
+            for y in sky_limit..floor_limit {
+
+
+                // A REVOIR
+                
+                let delta_y = y as f32 / floor_limit as f32;
+                let ty = (delta_y * (wall_texture.height() - 1) as f32) as u32;
+
+                let tex = wall_texture.get_pixel(tx, ty);
+
+                // Draw the wall
+                canvas.set_draw_color(Color::RGB(tex[0], tex[1], tex[2]));
+                canvas.draw_rect(Rect::new(x as i32, y as i32, 1, 1)).unwrap();
+
+            }
 
 
             //sky
             canvas.set_draw_color(Color::RGB(0, 0, 255));
-            canvas.draw_line(Point::new(ray_counter as i32, 0), Point::new(ray_counter as i32, (HALF_HEIGHT - wallheight) as i32)).unwrap();
-            // Draw the wall
-            canvas.set_draw_color(Color::RGB(0, 255, 0));
-            canvas.draw_line(Point::new(ray_counter as i32, sky_limit as i32), Point::new(ray_counter as i32, floor_limit as i32)).unwrap();
+            canvas.draw_line(Point::new(x as i32, 0), Point::new(x as i32, (HALF_HEIGHT - wallheight) as i32)).unwrap();
+            
             // floor
             canvas.set_draw_color(Color::RGB(155, 155, 155));
-            canvas.draw_line(Point::new(ray_counter as i32, floor_limit as i32), Point::new(ray_counter as i32, HEIGHT as i32)).unwrap();
+            canvas.draw_line(Point::new(x as i32, floor_limit as i32), Point::new(x as i32, HEIGHT as i32)).unwrap();
 
 
 
