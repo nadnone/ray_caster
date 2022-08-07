@@ -53,20 +53,19 @@ impl Raycaster
 
             // texture mapping
 
-            let delta_x;
+            let mut delta_x;
+            let moyenne = (ray_x + ray_y) / 2.0;
 
-            if ray_x < 0.5
+            if moyenne < 0.5
             {
                 // left side
-                delta_x = ray_x.floor() + ray_x;
-
+                delta_x = moyenne.floor() + moyenne;
             }
-            else 
+            else
             {
-                // right side
-                delta_x = ray_x.floor() + 1.0 - ray_x;
-            }
 
+                delta_x = moyenne.floor() + 1.0 - moyenne;
+            }
 
             let tx = (delta_x * (wall_texture.width() - 1) as f32) as u32;
 

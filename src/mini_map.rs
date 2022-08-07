@@ -3,13 +3,13 @@ use sdl2::{pixels::Color, rect::Rect};
 use sdl2::video::Window;
 
 use crate::camera::Camera;
-use crate::{misc::*, camera};
+use crate::misc::*;
 
 pub struct Minimap;
 
 impl Minimap
 {
-    pub fn minimap_load(canvas: &mut Canvas<Window>) -> (Vec<Position>, Vec<[u8; 3]>)
+    pub fn minimap_load() -> (Vec<Position>, Vec<[u8; 3]>)
     {
  
         let mut minimap_data = Vec::new();

@@ -1,12 +1,9 @@
-use std::time;
-
 use sdl2::EventPump;
-use sdl2::pixels::Color;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 
 use crate::inputs::inputs;
-use crate::camera::{Camera, self};
+use crate::camera::Camera;
 use crate::misc::{FPS, CAMERA_ANGLE_START};
 use crate::{raycaster::*, mini_map};
 
@@ -23,7 +20,7 @@ pub fn gameloop(canvas: &mut Canvas<Window>, event_pump: &mut EventPump, sdl_con
     let mut camera = Camera::new(5.5, 5.0, CAMERA_ANGLE_START);
     
     // load minimap
-    let minimap = mini_map::Minimap::minimap_load(canvas);
+    let minimap = mini_map::Minimap::minimap_load();
 
 
     //let mut t = 0.0;
