@@ -1,8 +1,8 @@
-pub const WIDTH:f32 = 800.0;
-pub const HEIGHT:f32 = 600.0;
+pub const WIDTH:f32 = 400.0;
+pub const HEIGHT:f32 = 225.0;
 pub const HALF_HEIGHT: i32 = HEIGHT as i32 / 2;
 
-pub const FPS: f32 = 1.0/60.0;
+pub const FPS: f32 = 1.0/120.0;
 
 pub const CAMERA_ANGLE_START: f32 = 90.0;
 
@@ -12,7 +12,7 @@ pub const HALF_FOV: f32 = FOV / 2.0;
 pub const SPEED: f32 = 0.1;
 pub const MAP_LEN: f32 = 6.0;
 
-pub const RAY_PRECISION: i32 = 32;
+pub const RAY_PRECISION: i32 = 256;
 pub const RAY_INCREAMENT_ANGLE: f32 = FOV / WIDTH as f32;
 
 pub const MAP: [[i32; 7]; 7] = [

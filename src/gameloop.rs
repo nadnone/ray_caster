@@ -32,9 +32,9 @@ pub fn gameloop(canvas: &mut Canvas<Window>, event_pump: &mut EventPump, sdl_con
         canvas.clear();
     
 
-
         // ray caster
-        Raycaster::raycasterize(canvas, &wall_texture, &camera);
+        Raycaster::engine(canvas, &wall_texture, &camera);
+
 
 
         // minimap
