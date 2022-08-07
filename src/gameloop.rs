@@ -1,6 +1,7 @@
 use sdl2::EventPump;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
+use sdl2::pixels::Color;
 
 use crate::inputs::inputs;
 use crate::camera::Camera;
@@ -28,13 +29,12 @@ pub fn gameloop(canvas: &mut Canvas<Window>, event_pump: &mut EventPump, sdl_con
     loop 
     {
         //let t0 = std::time::Instant::now();
-        
+        canvas.set_draw_color(Color::RGB(0, 0, 0));
         canvas.clear();
     
 
         // ray caster
         Raycaster::engine(canvas, &wall_texture, &camera);
-
 
 
         // minimap

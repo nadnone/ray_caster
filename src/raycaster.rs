@@ -68,7 +68,7 @@ impl Raycaster
             let tx = (delta_x * (wall_texture.width() - 1) as f32) as u32;
 
 
-            for i in 0..(wallheight * 2) % HEIGHT as i32 {
+            for i in 0..(wallheight * 2) {
 
 
                 let delta_y = i as f32 / (wallheight as f32 * 2.0);

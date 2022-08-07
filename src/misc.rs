@@ -1,5 +1,5 @@
-pub const WIDTH:f32 = 400.0;
-pub const HEIGHT:f32 = 225.0;
+pub const WIDTH:f32 = 480.0;
+pub const HEIGHT:f32 = 270.0;
 pub const HALF_HEIGHT: i32 = HEIGHT as i32 / 2;
 
 pub const FPS: f32 = 1.0/120.0;
