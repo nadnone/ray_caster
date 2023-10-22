@@ -11,12 +11,8 @@ impl Camera {
     
     pub fn new(x:f32, y:f32, angle: f32) -> Camera
     {
-        
-        let x_ = x;
-        let y_ = y;
-
         return Camera {
-            position: Position::new(x_ , y_),
+            position: Position::new(x , y),
             angle: misc::degtorad(angle),
         };
     }

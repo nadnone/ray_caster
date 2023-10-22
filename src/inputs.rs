@@ -1,119 +1,105 @@
 
+use std::f32::consts::PI;
+
 use sdl2::{
     keyboard::Scancode,
     EventPump, 
     Sdl
 };
 
-use crate::{camera::Camera, misc::{SPEED, self}};
+use crate::{camera::Camera, misc::{SPEED, self, WIDTH}};
 
-pub fn inputs(camera: &mut Camera, even_pump: &mut EventPump, sdl_context: &mut Sdl) -> u8
-{
-
-   
-    // Keyboard Events
-
-
-
-
-    let event_keyboard = even_pump.keyboard_state();
-
-    if event_keyboard.is_scancode_pressed(Scancode::Escape)
-    {
-        return 1;
-
-    }
-    if event_keyboard.is_scancode_pressed(Scancode::Tab)
-    {
-        sdl_context.mouse().show_cursor(true);
-        sdl_context.mouse().set_relative_mouse_mode(false);
-    }
- 
-
-
-    let mut angle = camera.get_angle();
-
-    let mut x = angle.cos() * SPEED;
-    let mut y = angle.sin() * SPEED;
-
-
-    if event_keyboard.is_scancode_pressed(Scancode::W)
-    {   
-        camera.translate(-x, -y, angle);
-    }
-    else if event_keyboard.is_scancode_pressed(Scancode::S)
-    {
-        camera.translate(x, y, angle);
-    }
-
-
-
-    let angle_cross = angle + 90.0;
-    let px = angle_cross.cos() * SPEED;
-    let py = angle_cross.sin() * SPEED;
-
-    if event_keyboard.is_scancode_pressed(Scancode::A)
-    {   
-        camera.translate(px, py, angle);
-    }
-    else if event_keyboard.is_scancode_pressed(Scancode::D)
-    {
-        camera.translate(-px, -py, angle);
-    }
-
-
-
-
-    if event_keyboard.is_scancode_pressed(Scancode::E)
-    {
-        angle -= misc::degtorad(2.0);
-
-        x = angle.sin() * 0.001;
-        y = angle.cos() * 0.001;
-
-        camera.translate(x, y, angle);
-
-    }
-    else if event_keyboard.is_scancode_pressed(Scancode::Q)
-    { 
-        angle += misc::degtorad(2.0);
-        
-        x = angle.sin() * 0.001;
-        y = angle.cos() * 0.001;
-
-        camera.translate(-x, -y, angle);
-
-    }
-
-
-
-    // MOUSE event
-    // A REVOIR
-/*
-    let mouse_relative = even_pump.mouse_state();
-
-    let mouse_x = Camera::degtorad(mouse_relative.x() as f32) * Camera::degtorad(FOV as f32) / 10.0;
-    
-    angle += mouse_x;
-
-    x = angle.cos() * 0.001;
-    y = angle.sin() * 0.001;
-
-    camera.translate(x, y, angle);
-
-
-    // recapture the cursor
-    if mouse_relative.is_mouse_button_pressed(sdl2::mouse::MouseButton::Left)
-    {
-        sdl_context.mouse().show_cursor(false);
-        sdl_context.mouse().set_relative_mouse_mode(true);
-    }
-    
-*/
-
-   
-    return 0;
-
+pub struct Inputs {
+    mouse_capture: bool
 }
 
+impl Inputs {
+    
 
+    pub fn new() -> Inputs
+    {
+        return Inputs {
+            mouse_capture: true
+        }
+    }
+
+    pub fn update(&mut self, camera: &mut Camera, even_pump: &mut EventPump, sdl_context: &mut Sdl) -> u8
+    {
+        
+
+        
+        let mut angle = camera.get_angle();
+        let angle_cross = angle + (90. * PI / 180.);
+
+        let mut x = 0.;
+        let mut y = 0.;
+
+
+        // MOUSE event
+        angle += even_pump.relative_mouse_state().x() as f32 / WIDTH;
+
+
+        // Keyboard Events
+        let event_keyboard = even_pump.keyboard_state();
+
+        if event_keyboard.is_scancode_pressed(Scancode::Escape)
+        {
+            return 1;
+
+        }
+        if event_keyboard.is_scancode_pressed(Scancode::Tab)
+        {
+            self.mouse_capture = !self.mouse_capture;
+
+            sdl_context.mouse().show_cursor(!self.mouse_capture);
+            sdl_context.mouse().set_relative_mouse_mode(self.mouse_capture);
+        }
+    
+
+        if event_keyboard.is_scancode_pressed(Scancode::W)
+        {   
+            x -= angle.cos() * SPEED;
+            y -= angle.sin() * SPEED;
+        }
+        else if event_keyboard.is_scancode_pressed(Scancode::S)
+        {
+            x += angle.cos() * SPEED;
+            y += angle.sin() * SPEED;
+        }
+
+        if event_keyboard.is_scancode_pressed(Scancode::A)
+        {   
+            x += angle_cross.cos() * SPEED;
+            y += angle_cross.sin() * SPEED;
+        }
+        else if event_keyboard.is_scancode_pressed(Scancode::D)
+        {
+            x -= angle_cross.cos() * SPEED;
+            y -= angle_cross.sin() * SPEED;
+        }
+
+        if event_keyboard.is_scancode_pressed(Scancode::E)
+        {
+            angle += misc::degtorad(2.0);
+
+            x += angle.sin() * SPEED;
+            y += angle.cos() * SPEED;
+        }
+        else if event_keyboard.is_scancode_pressed(Scancode::Q)
+        { 
+            angle -= misc::degtorad(2.0);
+            
+            x -= angle.sin() * SPEED;
+            y -= angle.cos() * SPEED;
+        }
+
+
+
+        camera.translate(x, y, angle);
+
+        return 0;
+
+    }
+
+
+}
