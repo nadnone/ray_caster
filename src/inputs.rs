@@ -7,7 +7,7 @@ use sdl2::{
     Sdl
 };
 
-use crate::{camera::Camera, misc::{SPEED, self, WIDTH}};
+use crate::{camera::Camera, constants::{SPEED, self, WIDTH}};
 
 pub struct Inputs {
     mouse_capture: bool
@@ -23,7 +23,7 @@ impl Inputs {
         }
     }
 
-    pub fn update(&mut self, camera: &mut Camera, even_pump: &mut EventPump, sdl_context: &mut Sdl) -> u8
+    pub fn update(&mut self, camera: &mut Camera, even_pump: &mut EventPump, sdl_context: &mut Sdl, map: &Vec<Vec<u8>>) -> u8
     {
         
 
@@ -80,14 +80,14 @@ impl Inputs {
 
         if event_keyboard.is_scancode_pressed(Scancode::E)
         {
-            angle += misc::degtorad(2.0);
+            angle += constants::degtorad(2.0);
 
             x += angle.sin() * SPEED;
             y += angle.cos() * SPEED;
         }
         else if event_keyboard.is_scancode_pressed(Scancode::Q)
         { 
-            angle -= misc::degtorad(2.0);
+            angle -= constants::degtorad(2.0);
             
             x -= angle.sin() * SPEED;
             y -= angle.cos() * SPEED;
@@ -95,7 +95,7 @@ impl Inputs {
 
 
 
-        camera.translate(x, y, angle);
+        camera.translate(x, y, angle, map);
 
         return 0;
 

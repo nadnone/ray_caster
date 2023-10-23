@@ -3,9 +3,10 @@ use sdl2::render::Canvas;
 use sdl2::video::Window;
 use sdl2::pixels::Color;
 
+use crate::gen_maze::Maze;
 use crate::inputs::Inputs;
 use crate::camera::Camera;
-use crate::misc::{FPS, CAMERA_ANGLE_START};
+use crate::constants::{FPS, CAMERA_ANGLE_START};
 use crate::{raycaster::*, mini_map};
 
 
@@ -20,8 +21,15 @@ pub fn gameloop(canvas: &mut Canvas<Window>, event_pump: &mut EventPump, sdl_con
     // load camera
     let mut camera = Camera::new(5.5, 5.0, CAMERA_ANGLE_START);
     
+    // maze gen
+    let mut maze_gen = Maze::init();
+    maze_gen.gen_maze(&mut camera);
+
+    let map = maze_gen.get_map();
+
     // load minimap
-    let minimap = mini_map::Minimap::minimap_load();
+    let minimap = mini_map::Minimap::minimap_load(&map);
+
 
     
     let mut inputs = Inputs::new();
@@ -36,7 +44,7 @@ pub fn gameloop(canvas: &mut Canvas<Window>, event_pump: &mut EventPump, sdl_con
     
 
         // ray caster
-        Raycaster::engine(canvas, &wall_texture, &camera);
+        Raycaster::engine(canvas, &wall_texture, &camera, &map);
 
 
         // minimap
@@ -47,7 +55,7 @@ pub fn gameloop(canvas: &mut Canvas<Window>, event_pump: &mut EventPump, sdl_con
     
         // Event
         event_pump.pump_events();
-        let callback = inputs.update(&mut camera, event_pump, sdl_context);
+        let callback = inputs.update(&mut camera, event_pump, sdl_context, &map);
         if callback == 1
         {
             break;
@@ -61,7 +69,7 @@ pub fn gameloop(canvas: &mut Canvas<Window>, event_pump: &mut EventPump, sdl_con
 
         t = t0.elapsed().as_secs_f32();
 
-        println!("{t} seconds");
+        //println!("{t} seconds");
     
     }
 }

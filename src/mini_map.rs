@@ -3,35 +3,37 @@ use sdl2::{pixels::Color, rect::Rect};
 use sdl2::video::Window;
 
 use crate::camera::Camera;
-use crate::misc::*;
+use crate::constants::*;
 
 pub struct Minimap;
 
+
 impl Minimap
 {
-    pub fn minimap_load() -> (Vec<Position>, Vec<[u8; 3]>)
+    pub fn minimap_load(map: &Vec<Vec<u8>>) -> (Vec<Position>, Vec<[u8; 3]>)
     {
  
         let mut minimap_data = Vec::new();
         let mut colors = Vec::new();
 
         // MAP
-        for j in 0..MAP[0].len() {
+        for i in 0..map[0].len() {
             
-            for i in 0..MAP.len() {
+            for j in 0..map.len() {
 
                 let mut color = [255, 155, 0];
 
-                if MAP[i][j] == 1
+                if map[i][j] == 1
                 {
                     color = [155, 155, 155];
                 }
-                minimap_data.push(Position::new(i as f32 * 10.0, j as f32* 10.0));
+                minimap_data.push(Position::new(i as f32 * SCALE_MINIMAP as f32, j as f32 * SCALE_MINIMAP as f32));
                 colors.push(color);
         
 
             }
         }
+
 
         return (minimap_data, colors);
     }
@@ -45,14 +47,19 @@ impl Minimap
             let c = minimap.1[i];
             canvas.set_draw_color(Color::RGB(c[0], c[1], c[2]));
 
-            let rect = Rect::new( minimap.0[i].x as i32, minimap.0[i].y as i32, 10, 10);
+            let rect = Rect::new( minimap.0[i].x as i32, minimap.0[i].y as i32, SCALE_MINIMAP as u32, SCALE_MINIMAP as u32);
             canvas.fill_rect(rect).unwrap();
         }
 
 
         // CAMERA
         canvas.set_draw_color(Color::RGB(255, 0, 0));
-        let rect = Rect::new(((camera.get_position().0 / MAP_LEN) * 60.0) as i32, (camera.get_position().1 / MAP_LEN * 60.0) as i32, 5, 5);
+
+        let pos_x = camera.get_position().0 as i32 * SCALE_MINIMAP;
+        let pos_y = camera.get_position().1 as i32 * SCALE_MINIMAP;
+
+        let rect = Rect::new(pos_x, pos_y, SCALE_MINIMAP as u32, SCALE_MINIMAP as u32);
+
         canvas.fill_rect(rect).unwrap();
  
     }

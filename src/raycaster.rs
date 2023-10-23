@@ -7,8 +7,8 @@ use sdl2::render::Canvas;
 use sdl2::video::Window;
 
 use crate::camera::Camera;
-use crate::misc;
-use crate::misc::*;
+use crate::constants;
+use crate::constants::*;
 
 pub struct Raycaster;
 
@@ -16,10 +16,10 @@ pub struct Raycaster;
 impl Raycaster 
 {
 
-    pub fn engine(canvas: &mut Canvas<Window>, wall_texture: &DynamicImage, camera: &Camera) 
+    pub fn engine(canvas: &mut Canvas<Window>, wall_texture: &DynamicImage, camera: &Camera, map: &Vec<Vec<u8>>) 
     {
 
-        let mut ray_angle = camera.get_angle() - misc::degtorad(HALF_FOV);
+        let mut ray_angle = camera.get_angle() - constants::degtorad(HALF_FOV);
 
         for x in 0..(WIDTH as i32)
         {
@@ -36,7 +36,7 @@ impl Raycaster
                 ray_x -= ray_angle.cos() / RAY_PRECISION as f32;
                 ray_y -= ray_angle.sin() / RAY_PRECISION as f32;
                 
-                wall = MAP[ray_x as usize][ray_y as usize];
+                wall = map[ray_x as usize][ray_y as usize];
             }
 
 
@@ -98,7 +98,7 @@ impl Raycaster
 
 
 
-            ray_angle += misc::degtorad(RAY_INCREAMENT_ANGLE);
+            ray_angle += constants::degtorad(RAY_INCREAMENT_ANGLE);
 
         }
     }

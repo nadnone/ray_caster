@@ -1,9 +1,9 @@
-use crate::misc::{*, self};
+use crate::constants::{*, self};
 
 
 #[derive(Copy, Clone)]
 pub struct Camera {
-    position: Position,
+    pub position: Position,
     angle: f32,
 }
 
@@ -13,14 +13,14 @@ impl Camera {
     {
         return Camera {
             position: Position::new(x , y),
-            angle: misc::degtorad(angle),
+            angle: constants::degtorad(angle),
         };
     }
 
 
-    pub fn translate(&mut self, x: f32 , y: f32, angle: f32)
+    pub fn translate(&mut self, x: f32 , y: f32, angle: f32, map: &Vec<Vec<u8>>)
     {
-        if MAP[(self.position.x + x) as usize][(self.position.y + y) as usize] != 1
+        if map[(self.position.x + x) as usize][(self.position.y + y) as usize] != 1
         {
             self.position.x += x;
             self.position.y += y;

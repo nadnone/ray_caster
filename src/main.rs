@@ -1,13 +1,13 @@
 
-mod misc;
+mod constants;
 mod inputs;
 mod camera;
 mod gameloop;
 mod raycaster;
 mod mini_map;
+mod gen_maze;
 
-
-use crate::{gameloop::gameloop, misc::*};
+use crate::{gameloop::gameloop, constants::*};
 
 
 pub fn main()
