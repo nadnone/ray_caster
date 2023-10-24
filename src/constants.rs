@@ -11,10 +11,12 @@ pub const HALF_FOV: f32 = FOV / 2.0;
 
 pub const SPEED: f32 = 0.1;
 
-pub const RAY_PRECISION: i32 = 512;
+pub const RAY_PRECISION: i32 = 64;
 pub const RAY_INCREAMENT_ANGLE: f32 = FOV / WIDTH as f32;
 
-pub const SCALE_MINIMAP: i32 = 5;
+pub const SCALE_MINIMAP: f32 = 1./2.;
+pub const SCALE_GEN_MAP: f32 = 6.;
+pub const INITIAL_MAZE_SIZE: i16 = 7;
 
 #[derive(Copy, Clone)]
 pub struct Position {

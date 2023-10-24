@@ -16,7 +16,7 @@ pub struct Raycaster;
 impl Raycaster 
 {
 
-    pub fn engine(canvas: &mut Canvas<Window>, wall_texture: &DynamicImage, camera: &Camera, map: &Vec<Vec<u8>>) 
+    pub fn engine(canvas: &mut Canvas<Window>, wall_texture: &DynamicImage, camera: &mut Camera, map: &Vec<Vec<u8>>) 
     {
 
         let mut ray_angle = camera.get_angle() - constants::degtorad(HALF_FOV);
@@ -24,8 +24,8 @@ impl Raycaster
         for x in 0..(WIDTH as i32)
         {
 
-            let mut ray_x = camera.get_position().0;
-            let mut ray_y = camera.get_position().1;
+            let mut ray_x = camera.position.x;
+            let mut ray_y = camera.position.y;
 
 
 
@@ -56,12 +56,12 @@ impl Raycaster
 
             if moyenne < 0.5
             {
-                // left side
+                // left half side
                 delta_x = moyenne.floor() + moyenne;
             }
             else
             {
-
+                // right half side
                 delta_x = moyenne.floor() + 1.0 - moyenne;
             }
 

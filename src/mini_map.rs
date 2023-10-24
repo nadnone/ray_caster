@@ -40,6 +40,7 @@ impl Minimap
 
     pub fn minimap_draw(canvas: &mut Canvas<Window>, minimap: &(Vec<Position>, Vec<[u8; 3]>), camera: Camera)
     {
+        let wh = 1. / SCALE_MINIMAP;
 
 
         for i in 0..minimap.0.len()
@@ -47,7 +48,16 @@ impl Minimap
             let c = minimap.1[i];
             canvas.set_draw_color(Color::RGB(c[0], c[1], c[2]));
 
-            let rect = Rect::new( minimap.0[i].x as i32, minimap.0[i].y as i32, SCALE_MINIMAP as u32, SCALE_MINIMAP as u32);
+
+            let x = minimap.0[i].x * wh;
+            let y = minimap.0[i].y * wh;
+
+
+            let rect = Rect::new( 
+                x as i32, y as i32,
+                wh as u32,
+                wh as u32
+            );
             canvas.fill_rect(rect).unwrap();
         }
 
@@ -55,10 +65,14 @@ impl Minimap
         // CAMERA
         canvas.set_draw_color(Color::RGB(255, 0, 0));
 
-        let pos_x = camera.get_position().0 as i32 * SCALE_MINIMAP;
-        let pos_y = camera.get_position().1 as i32 * SCALE_MINIMAP;
+        let pos_x = camera.position.x;
+        let pos_y = camera.position.y;
 
-        let rect = Rect::new(pos_x, pos_y, SCALE_MINIMAP as u32, SCALE_MINIMAP as u32);
+        let rect = Rect::new(
+            pos_x as i32, pos_y as i32,
+            wh as u32 / 2,
+            wh as u32 / 2
+        );
 
         canvas.fill_rect(rect).unwrap();
  

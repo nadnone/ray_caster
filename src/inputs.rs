@@ -38,7 +38,6 @@ impl Inputs {
         // MOUSE event
         angle += even_pump.relative_mouse_state().x() as f32 / WIDTH;
 
-
         // Keyboard Events
         let event_keyboard = even_pump.keyboard_state();
 
@@ -92,8 +91,6 @@ impl Inputs {
             x -= angle.sin() * SPEED;
             y -= angle.cos() * SPEED;
         }
-
-
 
         camera.translate(x, y, angle, map);
 
