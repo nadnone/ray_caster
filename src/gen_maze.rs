@@ -232,7 +232,7 @@ impl Maze {
 
 
             // on bride le cycle à FPS
-            thread::sleep(Duration::from_secs_f32(FPS));
+            //thread::sleep(Duration::from_secs_f32(FPS));
         }
 
         println!("[!] Maze Generation finished !");
