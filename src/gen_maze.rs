@@ -1,17 +1,23 @@
-use std::{thread, time::Duration};
+use std::arch::x86_64;
+use std::time::Duration;
+
 use rand::Rng;
 use sdl2::EventPump;
 use sdl2::rect::Rect;
+use sdl2::sys::{YSorted, YXBanded};
 use sdl2::{render::Canvas, pixels::Color};
 use sdl2::video::Window;
 
-use crate::constants::{FPS, INITIAL_MAZE_SIZE, SCALE_MINIMAP, SCALE_GEN_MAP};
+use crate::constants::{INITIAL_MAZE_SIZE, SCALE_MINIMAP, SCALE_GEN_MAP, MAX_DEPTH, FPS};
 
 
 pub struct Maze {
     matrice: Vec<Vec<[i16; 3]>>,
     current: [i16; 2],
-    step: [i16; 2],
+    stack: Vec<[i16; 2]>,
+    cycle: i16,
+    state: String,
+    depth: i16,
     pub map: Vec<Vec<u8>>,
 }
 
@@ -26,7 +32,7 @@ impl Maze {
             let mut row: Vec<[i16; 3]> = vec![];
             for _ in 0..n
             {
-                row.push([2, 2, 0]); // [Left Right walls, Up Down Walls, visited bool]
+                row.push([0, 0, 0]); // [right, down, visited]
             }
             self.matrice.push(row);
         }
@@ -36,7 +42,7 @@ impl Maze {
     fn gen_rand_vector() -> [i16; 2]
     {
         let r = rand::thread_rng().gen_range(0..3);
-        let rand_axe = rand::thread_rng().gen_bool(1./3.);
+        let rand_axe = rand::thread_rng().gen_bool(1./5.);
 
         if rand_axe
         {
@@ -48,7 +54,7 @@ impl Maze {
         }
     }
 
-    fn check_visited(&mut self) -> bool
+    fn check_matrice_visited(&mut self) -> bool
     {
 
         for i in 0..self.matrice.len() {
@@ -64,127 +70,285 @@ impl Maze {
         return true;
     }
 
-    fn generate_maze_loop(&mut self, canvas: &mut Canvas<Window>) -> bool
+    fn check_adjacent_visited(&mut self) -> bool
     {
 
-        if self.check_visited() // si il n'y a plus de visited cell
+        for i in -1..=1 {
+            for j in -1..=1 {
+
+                let x = self.current[0] + i;
+                let y = self.current[1] + j;
+
+                if x >= self.matrice.len() as i16 || y >= self.matrice[0].len() as i16 || x < 0 || y < 0
+                {
+                    continue;
+                }
+
+                if self.matrice[x as usize][y as usize][2] == 0
+                {
+                    return false;
+                }
+            }        
+        }
+
+        return true;
+    }
+
+    fn new_path_recursive(&mut self, canvas: &mut Canvas<Window>)
+    {
+
+        let pos = self.stack.len() as i16 - self.cycle;
+
+        if pos <= 0 || pos >= self.stack.len() as i16
+        {
+            // si rien trouvé, on continue au pif
+            self.cycle = 0;
+            self.state = "failure back".to_string();
+            return;
+        }
+
+        let tmp_pos = self.stack[pos as usize];
+
+        if !self.check_adjacent_visited()
+        {
+            self.current = tmp_pos;
+
+            self.cycle = 0; // on reset les tentatives
+            self.depth = 0; // on reset la profondeur du chemin choisi
+            self.state = "unvisited".to_string();
+            self.generate_maze_recursive(canvas);
+        }
+        else
+        {
+            self.cycle += 1;
+            self.state = "back increament".to_string();
+            self.new_path_recursive(canvas)
+        }
+    }
+
+    fn generate_maze_recursive(&mut self, canvas: &mut Canvas<Window>) -> bool
+    {
+
+        if self.check_matrice_visited() // si il n'y a plus de visited cell
         {
             return true; // stop the gen
         }
 
-        self.step = self::Maze::gen_rand_vector();
+        // on choisi un vector aléatoire pour trouver un voisin
+        let [rx, ry] = Maze::gen_rand_vector(); 
+        let random_wall = [rx + self.current[0], ry + self.current[1]];
 
-        let px = self.step[0] + self.current[0];
-        let py = self.step[1] + self.current[1];
-
-        if px < 0 || py < 0 || px >= self.matrice.len() as i16 || py >= self.matrice[0].len() as i16
+        // on verifie les limites et les nombres aléatoires
+        if random_wall[0] < 0 || random_wall[1] < 0 || random_wall[0] >= self.matrice.len() as i16 || random_wall[1] >= self.matrice[0].len() as i16 || rx+ry == 0
         {
-            return false; // continue the gen
+
+            if !self.state.contains("back") 
+            {  
+                self.state = "failure bound".to_string();
+            }
+            else 
+            {
+                self.state = "back failure".to_string();
+            }
+
+            return false // on continue
         }
-        
+
+        // si pas visité
+        if self.matrice[random_wall[0] as usize][random_wall[1] as usize][2] == 0
+        {
+
+
+            // on incrémente la profondeur
+            self.depth += 1;
+            // on push dans le stack
+            self.stack.push(random_wall);
+
+            // on verifie si le mur n'est pas déjà ouvert
+            if  
+                self.matrice[self.current[0] as usize][self.current[1] as usize][0] > 0 && rx < 0 || // right
+                self.matrice[random_wall[0] as usize][random_wall[1] as usize][0] > 0 && rx > 0 || // left
+                self.matrice[self.current[0] as usize][self.current[1] as usize][1] > 0 && ry < 0 || // down
+                self.matrice[random_wall[0] as usize][random_wall[1] as usize][1] > 0 && ry > 0    // up
+            {
+                self.state = "failure check".to_string();
+                return false
+            }
+
+            // on casse le mur
+            if rx > 0
+            {
+                self.matrice[random_wall[0] as usize][random_wall[1] as usize][0] = 1; // left
+            }
+            if rx < 0
+            {
+                self.matrice[self.current[0] as usize][self.current[1] as usize][0] = 1; // right
+            }      
+            if ry > 0
+            {
+                self.matrice[random_wall[0] as usize][random_wall[1] as usize][1] = 1; // down
+            }
+            if ry < 0
+            {
+                self.matrice[self.current[0] as usize][self.current[1] as usize][1] = 1; // up
+            }
+
+
+            // on dit qu'on est passé par là
+            self.matrice[random_wall[0] as usize][random_wall[1] as usize][2] = 1;
+            self.state = "active".to_string();
+        }    
+
+        self.current = random_wall;
+
+        // si tout les adjacents n'ont pas été visité + ce n'est pas le résultat du backtrace
+        if !self.check_adjacent_visited() && self.depth < MAX_DEPTH && !self.state.contains("back")
+        {
+            self.generate_maze_recursive(canvas);
+        }
+        else // sinon on créer un nouveau chemin
+        {
+            self.new_path_recursive(canvas);
+        }
+
+
 
         // width and height for animation
         let wh = SCALE_MINIMAP * self.matrice.len() as f32 * SCALE_GEN_MAP;
 
-        if self.matrice[px as usize][py as usize][2] == 0 // if not visited
+        for px in 0..self.matrice.len() 
         {
-            // remove walls
-            if (px - self.current[0] as i16) != 0
+            for py in 0..self.matrice.len() 
             {
-                self.matrice[px as usize][py as usize][0] = px - self.current[0] as i16;
+                
+
+                let cell = self.matrice[px][py];
+                               
+                // draw
+                canvas.set_draw_color(Color::RGB(125, 125, 125));
+                canvas.fill_rect(Rect::new( 
+                    (px as f32 * wh) as i32,
+                    (py as f32 * wh) as i32,
+                    wh as u32,
+                    wh as u32
+                )).unwrap();
+
+
+
+                if cell[2] == 1
+                {          
+                    canvas.set_draw_color(Color::RGB(0, 255, 0));
+                    canvas.fill_rect(Rect::new( 
+                        (px as f32 * wh) as i32,
+                        (py as f32 * wh) as i32,
+                        wh as u32,
+                        wh as u32
+                    )).unwrap();
+                }
+
+                canvas.set_draw_color(Color::RGB(255, 0, 0));
+                canvas.fill_rect(Rect::new( 
+                    (self.current[0] as f32 * wh) as i32,
+                    (self.current[1] as f32 * wh) as i32,
+                    wh as u32,
+                    wh as u32
+                )).unwrap();
+               
+                // draw the enclosure of the map generator view
+                canvas.set_draw_color(Color::RGB(125, 0, 0));
+                canvas.draw_rect(Rect::new( 
+                    0,
+                    0,
+                    wh as u32 * self.matrice.len() as u32,
+                    wh as u32 * self.matrice.len() as u32
+                )).unwrap();
+
+
             }
-            if (py - self.current[1] as i16) != 0
-            {
-                self.matrice[px as usize][py as usize][1] = py - self.current[1] as i16;
-            }
+        }  
 
-
-            // mark as visited 
-            self.matrice[px as usize][py as usize][2] = 1;
-
-            // draw
-            canvas.set_draw_color(Color::RGB(125, 125, 125));
-            canvas.fill_rect(Rect::new( 
-                (px as f32 * wh) as i32,
-                (py as f32 * wh) as i32,
-                wh as u32,
-                wh as u32
-            )).unwrap();
-        }
-
-          // draw the enclosure of the map generator view
-          
-          canvas.set_draw_color(Color::RGB(125, 0, 0));
-          canvas.draw_rect(Rect::new( 
-              0,
-              0,
-              wh as u32 * self.matrice.len() as u32,
-              wh as u32 * self.matrice.len() as u32
-          )).unwrap();
-
-          canvas.present();
-          
-
-        self.current = [px, py];
         return false; // continue the gen
+
+        
     }
 
-    fn gen_map(&mut self, n: i16)
+    fn gen_map(&mut self)
     {
-        for i in 0..n*3 + 4 {
+
+        let n = self.matrice.len();
+
+        for i in 0..=n*3 + 1 {
 
             let mut vec = vec![];
 
-            for j in 0..n*3 + 4 {
+            for j in 0..=n*3 + 1 {
 
-                if i == 0 || j == 0 || i == n*3+3 || j == n*3+3
+                if i == 0 || j == 0 || i == n*3+1 || j == n*3+1
                 {
-                    vec.push(1);
+                    vec.push(1); // mur limites
                 }
                 else 
                 {
-                    vec.push(0);
+                    vec.push(0)
                 }
             }
             self.map.push(vec);
         }
 
 
+        for x in (1..self.map.len() - 1).step_by(3)
+        {
+            
+            for y in (1..self.map[x].len() - 1).step_by(3)
+            {
+            
+                let px = ((x as f32 / 3.) - 1.).floor() as usize;
+                let py = ((y as f32 / 3.) - 1.).floor() as usize;
 
-        for x in 1..=n {
-            for y in 1..=n {
+                let right_wall = self.matrice[px + 0][py][0];
+                let left_wall = self.matrice[px + 1][py][0];
 
-                let px = x as usize * 3;
-                let py = y as usize * 3;
+                let down_wall = self.matrice[px][py + 1][1];
+                let up_wall = self.matrice[px][py + 0][1];
+                
+                self.map[x][y] = 0;
 
-                let lr_wall = self.matrice[x as usize - 1][y as usize - 1][0];
-                let ud_wall = self.matrice[x as usize - 1][y as usize - 1][1];
-               
-               // gauche droite
-                if lr_wall != 0 && lr_wall != 2
+                // TODO REVOIR LES CONDITIONS
+
+                if down_wall & up_wall == 1 // si les deux sont fermés
                 {
-                    self.map[px - (lr_wall + 1) as usize][py] = 1;
+                    // on ferme tous
+                    self.map[x][y - 1] = 1;
+                    self.map[x][y + 0] = 1;
+                    self.map[x][y + 1] = 1;
                 }
-                else if lr_wall == 2
+                else if down_wall == 1
                 {
-                    self.map[px - 0][py] = 1;
-                    self.map[px - 1][py] = 1;
-                    self.map[px - 2][py] = 1;
+                    self.map[x][y - 1] = 1;
+                }
+                else if up_wall == 1
+                {
+                    self.map[x][y - 1] = 1;
                 }
 
-                // haut bas
-                if ud_wall != 0 && ud_wall != 2
+                if right_wall & left_wall == 1
                 {
-                    self.map[px][py - (ud_wall + 1) as usize] = 1;
+                    self.map[x - 1][y] = 1;
+                    self.map[x + 0][y] = 1;
+                    self.map[x + 1][y] = 1;
+
                 }
-                else if ud_wall == 2
+                else if right_wall == 1
                 {
-                    self.map[px][py - 0] = 1;
-                    self.map[px][py - 1] = 1;
-                    self.map[px][py - 2] = 1;
+                    self.map[x - 1][y] = 1;
+                }
+                else if left_wall == 1
+                {
+                    self.map[x + 1][y] = 1;
                 }
             }
         }
+
     }
 
     pub fn gen_maze(&mut self, canvas: &mut Canvas<Window>, event: &mut EventPump)
@@ -214,10 +378,9 @@ impl Maze {
             }
             
             // generation du labyrinthe
-            if self.generate_maze_loop(canvas) // si le maze est generé
+            if self.generate_maze_recursive(canvas) // si le maze est generé
             {   
-            
-                self.gen_map(n);
+                self.gen_map();
                 break;
             }
 
@@ -231,8 +394,10 @@ impl Maze {
             event.pump_events();
 
 
+            canvas.present();
+            
             // on bride le cycle à FPS
-            //thread::sleep(Duration::from_secs_f32(FPS));
+            //std::thread::sleep(Duration::from_secs_f32(FPS));
         }
 
         println!("[!] Maze Generation finished !");
@@ -244,8 +409,11 @@ impl Maze {
         return Maze {
             matrice: vec![],
             current: [0, 0],
-            step: [0,0],
-            map: vec![]
+            map: vec![],
+            stack: vec![],
+            cycle: 1,
+            state: "start".to_string(),
+            depth: 0
         };
     }
 

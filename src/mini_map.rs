@@ -17,9 +17,9 @@ impl Minimap
         let mut colors = Vec::new();
 
         // MAP
-        for i in 0..map[0].len() {
+        for i in 0..map.len() {
             
-            for j in 0..map.len() {
+            for j in 0..map[0].len() {
 
                 let mut color = [255, 155, 0];
 
