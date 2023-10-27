@@ -1,14 +1,10 @@
-use std::arch::x86_64;
-use std::time::Duration;
-
 use rand::Rng;
 use sdl2::EventPump;
 use sdl2::rect::Rect;
-use sdl2::sys::{YSorted, YXBanded};
 use sdl2::{render::Canvas, pixels::Color};
 use sdl2::video::Window;
 
-use crate::constants::{INITIAL_MAZE_SIZE, SCALE_MINIMAP, SCALE_GEN_MAP, MAX_DEPTH, FPS};
+use crate::constants::{INITIAL_MAZE_SIZE, SCALE_GEN_MAP, MAX_DEPTH};
 
 
 pub struct Maze {
@@ -214,7 +210,7 @@ impl Maze {
 
 
         // width and height for animation
-        let wh = SCALE_MINIMAP * self.matrice.len() as f32 * SCALE_GEN_MAP;
+        let wh = self.matrice.len() as f32 * SCALE_GEN_MAP;
 
         for px in 0..self.matrice.len() 
         {
@@ -277,13 +273,13 @@ impl Maze {
 
         let n = self.matrice.len();
 
-        for i in 0..=n*3 + 1 {
+        for i in 0..=n*2 + 1 {
 
             let mut vec = vec![];
 
-            for j in 0..=n*3 + 1 {
+            for j in 0..=n*2 + 1 {
 
-                if i == 0 || j == 0 || i == n*3+1 || j == n*3+1
+                if i == 0 || j == 0 || i == n*2+1 || j == n*2+1
                 {
                     vec.push(1); // mur limites
                 }
@@ -296,56 +292,79 @@ impl Maze {
         }
 
 
-        for x in (1..self.map.len() - 1).step_by(3)
+        for x in (1..self.map.len() - 1).step_by(2)
         {
             
-            for y in (1..self.map[x].len() - 1).step_by(3)
+            for y in (1..self.map[x].len() - 1).step_by(2)
             {
             
-                let px = ((x as f32 / 3.) - 1.).floor() as usize;
-                let py = ((y as f32 / 3.) - 1.).floor() as usize;
+                let px = ((x as f32 / 2.) - 1.).floor() as usize;
+                let py = ((y as f32 / 2.) - 1.).floor() as usize;
 
-                let right_wall = self.matrice[px + 0][py][0];
-                let left_wall = self.matrice[px + 1][py][0];
+                let right_wall = self.matrice[px + 0][py + 0][0];
+                let left_wall =  self.matrice[px + 1][py + 0][0];
 
-                let down_wall = self.matrice[px][py + 1][1];
-                let up_wall = self.matrice[px][py + 0][1];
+                let down_wall =  self.matrice[px + 0][py + 1][1];
+                let up_wall =    self.matrice[px + 0][py + 0][1];
                 
-                self.map[x][y] = 0;
+                self.map[x][y] = 1; // par défaut il y a un mur
 
-                // TODO REVOIR LES CONDITIONS
+                match 1 {
 
-                if down_wall & up_wall == 1 // si les deux sont fermés
-                {
-                    // on ferme tous
-                    self.map[x][y - 1] = 1;
-                    self.map[x][y + 0] = 1;
-                    self.map[x][y + 1] = 1;
-                }
-                else if down_wall == 1
-                {
-                    self.map[x][y - 1] = 1;
-                }
-                else if up_wall == 1
-                {
-                    self.map[x][y - 1] = 1;
+                    k if k == (down_wall | up_wall) & down_wall => {
+                        self.map[x + 0][y + 1] = 1; // down
+                    },
+                    k if k == (down_wall | up_wall) & up_wall => {
+                        self.map[x + 0][y - 1] = 1; // up
+                    },
+                    k if k == (right_wall | left_wall) & right_wall => {
+                        self.map[x - 1][y + 0] = 1; // right
+                    },
+                    k if k == (right_wall | left_wall) & left_wall => {
+                        self.map[x + 1][y + 0] = 1; // left
+                    },
+
+                    // L + R
+                    k if k == right_wall & left_wall => {
+                        self.map[x - 1][y] = 1; // right
+                        self.map[x + 0][y] = 0; // middle
+                        self.map[x + 1][y] = 1; // left
+                    },
+
+                    // Up + L | R
+                    k if k == right_wall & up_wall => {
+                        self.map[x - 1][y + 0] = 1; // right
+                        self.map[x + 0][y + 0] = 0; // middle
+                        self.map[x + 0][y - 1] = 1; // up
+                    },
+                    k if k == left_wall & up_wall => {
+                        self.map[x + 1][y + 0] = 1; // left
+                        self.map[x + 0][y + 0] = 0; // middle
+                        self.map[x + 0][y - 1] = 1; // up
+                    },
+
+                    // Down + L | R
+                    k if k == right_wall & down_wall => { 
+                        self.map[x - 1][y + 0] = 1; // right
+                        self.map[x + 0][y + 0] = 0; // middle
+                        self.map[x + 0][y + 1] = 1; // down 
+                    },
+                    k if k == left_wall & down_wall => {
+                        self.map[x + 1][y + 0] = 1; // left
+                        self.map[x + 0][y + 0] = 0; // middle
+                        self.map[x + 0][y + 1] = 1; // down 
+                    },
+
+                    // Up & Down
+                    k if k == up_wall & down_wall => {
+                        self.map[x + 0][y - 1] = 1; // up
+                        self.map[x + 0][y + 0] = 0; // middle
+                        self.map[x + 0][y + 1] = 1; // down
+                    },
+      
+                    _ => {} 
                 }
 
-                if right_wall & left_wall == 1
-                {
-                    self.map[x - 1][y] = 1;
-                    self.map[x + 0][y] = 1;
-                    self.map[x + 1][y] = 1;
-
-                }
-                else if right_wall == 1
-                {
-                    self.map[x - 1][y] = 1;
-                }
-                else if left_wall == 1
-                {
-                    self.map[x + 1][y] = 1;
-                }
             }
         }
 

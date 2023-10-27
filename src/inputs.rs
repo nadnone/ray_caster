@@ -1,13 +1,11 @@
 
-use std::f32::consts::PI;
-
 use sdl2::{
     keyboard::Scancode,
     EventPump, 
     Sdl
 };
 
-use crate::{camera::Camera, constants::{SPEED, self, WIDTH}};
+use crate::{camera::Camera, constants::{SPEED, self, WIDTH, degtorad}};
 
 pub struct Inputs {
     mouse_capture: bool
@@ -29,7 +27,7 @@ impl Inputs {
 
         
         let mut angle = camera.get_angle();
-        let angle_cross = angle + (90. * PI / 180.);
+        let angle_cross = angle + degtorad(90.);
 
         let mut x = 0.;
         let mut y = 0.;

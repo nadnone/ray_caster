@@ -22,13 +22,13 @@ impl Camera {
 
     pub fn translate(&mut self, x: f32 , y: f32, angle: f32, map: &Vec<Vec<u8>>)
     {
-        if map[(self.position.x + x) as usize][(self.position.y + y) as usize] != 1
+
+        if  map[(self.position.x + x) as usize][(self.position.y + y) as usize] != 1
         {
             self.position.x += x;
             self.position.y += y;
             self.angle = angle;
         }
-        
 
     }
 
@@ -50,14 +50,14 @@ impl Camera {
                 t_tmp = t1;
             }
 
-            let r_x = rand::thread_rng().gen_range(1..(map.len() -2));
-            let r_y = rand::thread_rng().gen_range(1..(map[0].len() -2));
+            let r_x = rand::thread_rng().gen_range(2..(map.len() -2));
+            let r_y = rand::thread_rng().gen_range(2..(map[0].len() -2));
 
             // si libre, alors on choisi cette position
-            if  map[r_x + self.angle.cos() as usize * 2][r_y + self.angle.sin() as usize * 2] == 0 
+            if map[r_x][r_y] == 0
             {
-                self.position.x = r_x as f32;
-                self.position.y = r_y as f32;
+                self.position.x = r_x as f32 + SPAWN_MARGE_MAP_DIST; // + 0.3 pour ne pas être dans un mur 
+                self.position.y = r_y as f32 + SPAWN_MARGE_MAP_DIST;
 
                 println!("[!] Position found !, you can play.");
                 return;
