@@ -97,25 +97,25 @@ impl Maze {
 
         if pos <= 0 || pos >= self.stack.len() as i16
         {
-            // si rien trouvé, on continue au pif
-            self.cycle = 0;
-            self.state = STATES::FAILURE;
+            // si rien trouvé, on recommence
+            self.cycle = 1; 
+            self.state = STATES::BACK;
             return;
         }
 
         let tmp_pos = self.stack[pos as usize];
 
-        if !self.check_adjacent_visited()
+        if !self.check_adjacent_visited() // nouvelle position trouvée
         {
-            self.current = tmp_pos;
-
-            self.cycle = 0; // on reset les tentatives
+            self.current = tmp_pos; // on prend l'ancienne position trouvée
+            self.cycle = 1; // on reset les tentatives
             self.depth = 0; // on reset la profondeur du chemin choisi
             self.state = STATES::ACTIVE;
             self.generate_maze_recursive(canvas);
         }
         else
         {
+            // on continue d'aller en arrière
             self.cycle += 1;
             self.state = STATES::BACK;
             self.new_path_recursive(canvas)
@@ -124,7 +124,7 @@ impl Maze {
 
     fn generate_maze_recursive(&mut self, canvas: &mut Canvas<Window>) -> bool
     {
-
+        
         if self.check_matrice_visited() // si il n'y a plus de visited cell
         {
             return true; // stop the gen
@@ -137,16 +137,7 @@ impl Maze {
         // on verifie les limites et les nombres aléatoires
         if random_wall[0] < 0 || random_wall[1] < 0 || random_wall[0] >= self.matrice.len() as i16 || random_wall[1] >= self.matrice[0].len() as i16 || rx+ry == 0
         {
-
-            if self.state != STATES::BACK
-            {  
-                self.state = STATES::FAILURE;
-            }
-            else 
-            {
-                self.state = STATES::BACK;
-            }
-
+            self.state = STATES::FAILURE;
             return false // on continue
         }
 
@@ -154,6 +145,7 @@ impl Maze {
         if self.matrice[random_wall[0] as usize][random_wall[1] as usize][2] == false
         {
 
+            
 
             // on incrémente la profondeur
             self.depth += 1;
@@ -195,6 +187,7 @@ impl Maze {
             self.state = STATES::ACTIVE;
         }    
 
+        // le curseur devient la nouvelle cellule
         self.current = random_wall;
 
         // si tout les adjacents n'ont pas été visité + ce n'est pas le résultat du backtrace
@@ -207,7 +200,12 @@ impl Maze {
             self.new_path_recursive(canvas);
         }
 
+        
+        return false; // continue the gen
+    }
 
+    fn cell_animation_loading(&mut self, canvas: &mut Canvas<Window>)
+    {
 
         // width and height for animation
         let wh = self.matrice.len() as f32 * SCALE_GEN_MAP;
@@ -220,20 +218,11 @@ impl Maze {
 
                 let cell = self.matrice[px][py];
                                
-                // draw
-                canvas.set_draw_color(Color::RGB(125, 125, 125));
-                canvas.fill_rect(Rect::new( 
-                    (px as f32 * wh) as i32,
-                    (py as f32 * wh) as i32,
-                    wh as u32,
-                    wh as u32
-                )).unwrap();
 
-
-
+                // draw the visited cell
                 if cell[2] == true
                 {          
-                    canvas.set_draw_color(Color::RGB(0, 255, 0));
+                    canvas.set_draw_color(Color::RGB(0, 128, 0));
                     canvas.fill_rect(Rect::new( 
                         (px as f32 * wh) as i32,
                         (py as f32 * wh) as i32,
@@ -241,15 +230,18 @@ impl Maze {
                         wh as u32
                     )).unwrap();
                 }
-
-                canvas.set_draw_color(Color::RGB(255, 0, 0));
-                canvas.fill_rect(Rect::new( 
-                    (self.current[0] as f32 * wh) as i32,
-                    (self.current[1] as f32 * wh) as i32,
-                    wh as u32,
-                    wh as u32
-                )).unwrap();
-               
+                else
+                {
+                    // draw
+                    canvas.set_draw_color(Color::RGB(125, 125, 125));
+                    canvas.fill_rect(Rect::new( 
+                        (px as f32 * wh) as i32,
+                        (py as f32 * wh) as i32,
+                        wh as u32,
+                        wh as u32
+                    )).unwrap();
+                }
+              
                 // draw the enclosure of the map generator view
                 canvas.set_draw_color(Color::RGB(125, 0, 0));
                 canvas.draw_rect(Rect::new( 
@@ -263,23 +255,24 @@ impl Maze {
             }
         }  
 
-        return false; // continue the gen
 
         
     }
 
     fn gen_map(&mut self)
     {
+        let start = 3;
+        let end = 2;
 
         let n = self.matrice.len();
 
-        for i in 0..=n*2 + 1 {
+        for i in 0..=n*2 + end {
 
             let mut vec = vec![];
 
-            for j in 0..=n*2 + 1 {
+            for j in 0..=n*2 + end {
 
-                if i == 0 || j == 0 || i == n*2+1 || j == n*2+1
+                if i == 0 || j == 0 || i == n*2+end || j == n*2+end
                 {
                     vec.push(1); // mur limites
                 }
@@ -292,14 +285,15 @@ impl Maze {
         }
 
 
-        for x in (1..self.map.len() - 1).step_by(2)
+
+        for x in (start..self.map.len() - end).step_by(2)
         {
             
-            for y in (1..self.map[x].len() - 1).step_by(2)
+            for y in (start..self.map[x].len() - end).step_by(2)
             {
             
-                let px = ((x as f32 / 2.) - 1.).floor() as usize;
-                let py = ((y as f32 / 2.) - 1.).floor() as usize;
+                let px = ((x as f32 / 2.) - start as f32).floor() as usize;
+                let py = ((y as f32 / 2.) - start as f32).floor() as usize;
 
                 let right_wall = self.matrice[px + 0][py + 0][0];
                 let left_wall =  self.matrice[px + 1][py + 0][0];
@@ -310,7 +304,13 @@ impl Maze {
                 self.map[x][y] = 1; // par défaut il y a un mur
 
                 match true {
+                    
+                    // aucun mur
+                    k if k == down_wall & up_wall & left_wall & right_wall => {
+                        self.map[x + 0][y + 0] = 0; 
+                    },
 
+                    // uniquement un mur
                     k if k == !down_wall & up_wall => {
                         self.map[x + 0][y + 1] = 1; // down
                     },
@@ -327,19 +327,16 @@ impl Maze {
                     // L + R
                     k if k == !right_wall & !left_wall => {
                         self.map[x - 1][y] = 1; // right
-                        self.map[x + 0][y] = 1; // middle
                         self.map[x + 1][y] = 1; // left
                     },
 
                     // Up + L | R
                     k if k == !right_wall & !up_wall => {
                         self.map[x - 1][y + 0] = 1; // right
-                        self.map[x + 0][y + 0] = 1; // middle
                         self.map[x + 0][y - 1] = 1; // up
                     },
                     k if k == !left_wall & !up_wall => {
                         self.map[x + 1][y + 0] = 1; // left
-                        self.map[x + 0][y + 0] = 1; // middle
                         self.map[x + 0][y - 1] = 1; // up
                     },
 
@@ -387,6 +384,8 @@ impl Maze {
 
         let t = std::time::Instant::now();
         let mut t_tmp = 0;
+
+        
         loop {
 
             let t1 = t.elapsed().as_secs();
@@ -396,6 +395,9 @@ impl Maze {
                 t_tmp = t1;
             }
             
+            // pour animer le chargement
+            self.cell_animation_loading(canvas);
+
             // generation du labyrinthe
             if self.generate_maze_recursive(canvas) // si le maze est generé
             {   
@@ -430,7 +432,7 @@ impl Maze {
             current: [0, 0],
             map: vec![],
             stack: vec![],
-            cycle: 1,
+            cycle: 1, // 1 car la len() max n'est pas l'index max
             state: STATES::ACTIVE,
             depth: 0
         };

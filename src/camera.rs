@@ -66,17 +66,6 @@ impl Camera {
 
     }
 
-    pub fn get_angle(self) -> f32
-    {
-        return self.angle;
-    }
-
-    pub fn get_position(self) -> (f32, f32)
-    {
-        return (self.position.x, self.position.y);
-    }
-
-
 }
 
 

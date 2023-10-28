@@ -5,7 +5,7 @@ use sdl2::{
     Sdl
 };
 
-use crate::{camera::Camera, constants::{SPEED, self, WIDTH, degtorad}};
+use crate::{camera::Camera, constants::{SPEED, self, WIDTH, degtorad, STATES}};
 
 pub struct Inputs {
     mouse_capture: bool
@@ -21,12 +21,12 @@ impl Inputs {
         }
     }
 
-    pub fn update(&mut self, camera: &mut Camera, even_pump: &mut EventPump, sdl_context: &mut Sdl, map: &Vec<Vec<u8>>) -> u8
+    pub fn update(&mut self, camera: &mut Camera, even_pump: &mut EventPump, sdl_context: &mut Sdl, map: &Vec<Vec<u8>>) -> STATES
     {
         
 
         
-        let mut angle = camera.get_angle();
+        let mut angle = camera.angle;
         let angle_cross = angle + degtorad(90.);
 
         let mut x = 0.;
@@ -41,7 +41,7 @@ impl Inputs {
 
         if event_keyboard.is_scancode_pressed(Scancode::Escape)
         {
-            return 1;
+            return STATES::QUIT;
 
         }
         if event_keyboard.is_scancode_pressed(Scancode::Tab)
@@ -92,7 +92,7 @@ impl Inputs {
 
         camera.translate(x, y, angle, map);
 
-        return 0;
+        return STATES::ACTIVE;
 
     }
 

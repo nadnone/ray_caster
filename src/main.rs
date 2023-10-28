@@ -11,7 +11,7 @@ use sdl2::pixels::Color;
 use crate::gen_maze::Maze;
 use crate::inputs::Inputs;
 use crate::camera::Camera;
-use crate::constants::{FPS, CAMERA_ANGLE_START, WIDTH, HEIGHT};
+use crate::constants::{FPS, CAMERA_ANGLE_START, WIDTH, HEIGHT, STATES};
 use crate::raycaster::*;
 
 
@@ -94,7 +94,7 @@ pub fn main()
         // Event
         event_pump.pump_events();
         let callback = inputs.update(&mut camera, &mut event_pump, &mut sdl_context, &maze_gen.map);
-        if callback == 1
+        if callback == STATES::QUIT
         {
             break;
         }

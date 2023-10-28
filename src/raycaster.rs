@@ -19,7 +19,7 @@ impl Raycaster
     pub fn engine(canvas: &mut Canvas<Window>, wall_texture: &DynamicImage, camera: &mut Camera, map: &Vec<Vec<u8>>) 
     {
 
-        let mut ray_angle = camera.get_angle() - constants::degtorad(HALF_FOV);
+        let mut ray_angle = camera.angle - constants::degtorad(HALF_FOV);
 
         for x in 0..(WIDTH as i32)
         {
@@ -40,8 +40,8 @@ impl Raycaster
             }
 
 
-            let mut distance = ((camera.get_position().0 - ray_x).powf(2.0) + (camera.get_position().1 - ray_y).powf(2.0)).sqrt();
-            distance *= (ray_angle - camera.get_angle()).cos();
+            let mut distance = ((camera.position.x - ray_x).powf(2.0) + (camera.position.y - ray_y).powf(2.0)).sqrt();
+            distance *= (ray_angle - camera.angle).cos();
 
 
             let wallheight = (HALF_HEIGHT as f32 / distance) as i32; 
