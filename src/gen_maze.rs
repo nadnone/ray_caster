@@ -4,15 +4,15 @@ use sdl2::rect::Rect;
 use sdl2::{render::Canvas, pixels::Color};
 use sdl2::video::Window;
 
-use crate::constants::{INITIAL_MAZE_SIZE, SCALE_GEN_MAP, MAX_DEPTH};
+use crate::constants::{INITIAL_MAZE_SIZE, SCALE_GEN_MAP, MAX_DEPTH, STATES};
 
 
 pub struct Maze {
-    matrice: Vec<Vec<[i16; 3]>>,
+    matrice: Vec<Vec<[bool; 3]>>,
     current: [i16; 2],
     stack: Vec<[i16; 2]>,
     cycle: i16,
-    state: String,
+    state: STATES,
     depth: i16,
     pub map: Vec<Vec<u8>>,
 }
@@ -25,10 +25,10 @@ impl Maze {
 
         for _ in 0..n
         {
-            let mut row: Vec<[i16; 3]> = vec![];
+            let mut row: Vec<[bool; 3]> = vec![];
             for _ in 0..n
             {
-                row.push([0, 0, 0]); // [right, down, visited]
+                row.push([false, false, false]); // [right, down, visited]
             }
             self.matrice.push(row);
         }
@@ -56,7 +56,7 @@ impl Maze {
         for i in 0..self.matrice.len() {
             for j in 0..self.matrice[i].len() {
                 
-                if self.matrice[i][j][2] == 0 // not visited
+                if self.matrice[i][j][2] == false // not visited
                 {
                     return false;
                 }
@@ -80,7 +80,7 @@ impl Maze {
                     continue;
                 }
 
-                if self.matrice[x as usize][y as usize][2] == 0
+                if self.matrice[x as usize][y as usize][2] == false
                 {
                     return false;
                 }
@@ -99,7 +99,7 @@ impl Maze {
         {
             // si rien trouvé, on continue au pif
             self.cycle = 0;
-            self.state = "failure back".to_string();
+            self.state = STATES::FAILURE;
             return;
         }
 
@@ -111,13 +111,13 @@ impl Maze {
 
             self.cycle = 0; // on reset les tentatives
             self.depth = 0; // on reset la profondeur du chemin choisi
-            self.state = "unvisited".to_string();
+            self.state = STATES::ACTIVE;
             self.generate_maze_recursive(canvas);
         }
         else
         {
             self.cycle += 1;
-            self.state = "back increament".to_string();
+            self.state = STATES::BACK;
             self.new_path_recursive(canvas)
         }
     }
@@ -138,20 +138,20 @@ impl Maze {
         if random_wall[0] < 0 || random_wall[1] < 0 || random_wall[0] >= self.matrice.len() as i16 || random_wall[1] >= self.matrice[0].len() as i16 || rx+ry == 0
         {
 
-            if !self.state.contains("back") 
+            if self.state != STATES::BACK
             {  
-                self.state = "failure bound".to_string();
+                self.state = STATES::FAILURE;
             }
             else 
             {
-                self.state = "back failure".to_string();
+                self.state = STATES::BACK;
             }
 
             return false // on continue
         }
 
         // si pas visité
-        if self.matrice[random_wall[0] as usize][random_wall[1] as usize][2] == 0
+        if self.matrice[random_wall[0] as usize][random_wall[1] as usize][2] == false
         {
 
 
@@ -162,43 +162,43 @@ impl Maze {
 
             // on verifie si le mur n'est pas déjà ouvert
             if  
-                self.matrice[self.current[0] as usize][self.current[1] as usize][0] > 0 && rx < 0 || // right
-                self.matrice[random_wall[0] as usize][random_wall[1] as usize][0] > 0 && rx > 0 || // left
-                self.matrice[self.current[0] as usize][self.current[1] as usize][1] > 0 && ry < 0 || // down
-                self.matrice[random_wall[0] as usize][random_wall[1] as usize][1] > 0 && ry > 0    // up
+                self.matrice[self.current[0] as usize][self.current[1] as usize][0] && rx < 0 || // right
+                self.matrice[random_wall[0] as usize][random_wall[1] as usize][0] && rx > 0 || // left
+                self.matrice[self.current[0] as usize][self.current[1] as usize][1] && ry < 0 || // down
+                self.matrice[random_wall[0] as usize][random_wall[1] as usize][1] && ry > 0    // up
             {
-                self.state = "failure check".to_string();
+                self.state = STATES::FAILURE;
                 return false
             }
 
             // on casse le mur
             if rx > 0
             {
-                self.matrice[random_wall[0] as usize][random_wall[1] as usize][0] = 1; // left
+                self.matrice[random_wall[0] as usize][random_wall[1] as usize][0] = true; // left
             }
             if rx < 0
             {
-                self.matrice[self.current[0] as usize][self.current[1] as usize][0] = 1; // right
+                self.matrice[self.current[0] as usize][self.current[1] as usize][0] = true; // right
             }      
             if ry > 0
             {
-                self.matrice[random_wall[0] as usize][random_wall[1] as usize][1] = 1; // down
+                self.matrice[random_wall[0] as usize][random_wall[1] as usize][1] = true; // down
             }
             if ry < 0
             {
-                self.matrice[self.current[0] as usize][self.current[1] as usize][1] = 1; // up
+                self.matrice[self.current[0] as usize][self.current[1] as usize][1] = true; // up
             }
 
 
             // on dit qu'on est passé par là
-            self.matrice[random_wall[0] as usize][random_wall[1] as usize][2] = 1;
-            self.state = "active".to_string();
+            self.matrice[random_wall[0] as usize][random_wall[1] as usize][2] = true;
+            self.state = STATES::ACTIVE;
         }    
 
         self.current = random_wall;
 
         // si tout les adjacents n'ont pas été visité + ce n'est pas le résultat du backtrace
-        if !self.check_adjacent_visited() && self.depth < MAX_DEPTH && !self.state.contains("back")
+        if !self.check_adjacent_visited() && self.depth < MAX_DEPTH && self.state != STATES::BACK
         {
             self.generate_maze_recursive(canvas);
         }
@@ -231,7 +231,7 @@ impl Maze {
 
 
 
-                if cell[2] == 1
+                if cell[2] == true
                 {          
                     canvas.set_draw_color(Color::RGB(0, 255, 0));
                     canvas.fill_rect(Rect::new( 
@@ -309,56 +309,56 @@ impl Maze {
                 
                 self.map[x][y] = 1; // par défaut il y a un mur
 
-                match 1 {
+                match true {
 
-                    k if k == (down_wall | up_wall) & down_wall => {
+                    k if k == !down_wall & up_wall => {
                         self.map[x + 0][y + 1] = 1; // down
                     },
-                    k if k == (down_wall | up_wall) & up_wall => {
+                    k if k == down_wall & !up_wall => {
                         self.map[x + 0][y - 1] = 1; // up
                     },
-                    k if k == (right_wall | left_wall) & right_wall => {
+                    k if k == !right_wall & left_wall => {
                         self.map[x - 1][y + 0] = 1; // right
                     },
-                    k if k == (right_wall | left_wall) & left_wall => {
+                    k if k == right_wall & !left_wall => {
                         self.map[x + 1][y + 0] = 1; // left
                     },
 
                     // L + R
-                    k if k == right_wall & left_wall => {
+                    k if k == !right_wall & !left_wall => {
                         self.map[x - 1][y] = 1; // right
-                        self.map[x + 0][y] = 0; // middle
+                        self.map[x + 0][y] = 1; // middle
                         self.map[x + 1][y] = 1; // left
                     },
 
                     // Up + L | R
-                    k if k == right_wall & up_wall => {
+                    k if k == !right_wall & !up_wall => {
                         self.map[x - 1][y + 0] = 1; // right
-                        self.map[x + 0][y + 0] = 0; // middle
+                        self.map[x + 0][y + 0] = 1; // middle
                         self.map[x + 0][y - 1] = 1; // up
                     },
-                    k if k == left_wall & up_wall => {
+                    k if k == !left_wall & !up_wall => {
                         self.map[x + 1][y + 0] = 1; // left
-                        self.map[x + 0][y + 0] = 0; // middle
+                        self.map[x + 0][y + 0] = 1; // middle
                         self.map[x + 0][y - 1] = 1; // up
                     },
 
                     // Down + L | R
-                    k if k == right_wall & down_wall => { 
+                    k if k == !right_wall & !down_wall => { 
                         self.map[x - 1][y + 0] = 1; // right
-                        self.map[x + 0][y + 0] = 0; // middle
+                        self.map[x + 0][y + 0] = 1; // middle
                         self.map[x + 0][y + 1] = 1; // down 
                     },
-                    k if k == left_wall & down_wall => {
+                    k if k == !left_wall & !down_wall => {
                         self.map[x + 1][y + 0] = 1; // left
-                        self.map[x + 0][y + 0] = 0; // middle
+                        self.map[x + 0][y + 0] = 1; // middle
                         self.map[x + 0][y + 1] = 1; // down 
                     },
 
                     // Up & Down
-                    k if k == up_wall & down_wall => {
+                    k if k == !up_wall & !down_wall => {
                         self.map[x + 0][y - 1] = 1; // up
-                        self.map[x + 0][y + 0] = 0; // middle
+                        self.map[x + 0][y + 0] = 1; // middle
                         self.map[x + 0][y + 1] = 1; // down
                     },
       
@@ -379,7 +379,7 @@ impl Maze {
         let r_x = rand::thread_rng().gen_range(0..(n -1));
         let r_y = rand::thread_rng().gen_range(0..(n -1));
         
-        self.matrice[r_x as usize][r_y as usize][2] = 1; // mark as visited
+        self.matrice[r_x as usize][r_y as usize][2] = true; // mark as visited
         
         println!("[!] Maze Generation started, please wait..");
 
@@ -431,7 +431,7 @@ impl Maze {
             map: vec![],
             stack: vec![],
             cycle: 1,
-            state: "start".to_string(),
+            state: STATES::ACTIVE,
             depth: 0
         };
     }

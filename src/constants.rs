@@ -24,6 +24,13 @@ pub const SPAWN_MARGE_MAP_DIST: f32 = 0.5;
 
 pub const MAX_DEPTH: i16 = INITIAL_MAZE_SIZE/2;
 
+#[derive(PartialEq)]
+pub enum STATES {
+    ACTIVE,
+    FAILURE,
+    BACK,
+}
+
 #[derive(Copy, Clone)]
 pub struct Position {
     pub x: f32,
